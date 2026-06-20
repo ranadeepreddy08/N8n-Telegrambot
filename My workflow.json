@@ -1,0 +1,162 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        160,
+        208
+      ],
+      "id": "f4f7fba1-d9e8-46d1-8cf0-f76155e362bb",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "nyKjgWJk60EYjzW4",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        -16
+      ],
+      "id": "29284221-7ad0-49aa-a07a-13317c035a8f",
+      "name": "Telegram Trigger",
+      "webhookId": "c5ed6ed3-d328-417e-a65d-5f376dfe9ba9",
+      "credentials": {
+        "telegramApi": {
+          "id": "24uZMQPVCilEnX9c",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are an expert idea generator, trend researcher, creative strategist, and brainstorming assistant.\n\nWhen a user provides a topic, interest, goal, problem, hobby, business idea, project, skill, technology, career field, lifestyle topic, or any general query, generate creative, useful, and diverse ideas.\n\nFor every request:\n\n1. Understand the topic deeply.\n2. Generate 20 unique ideas.\n3. Include beginner, practical, innovative, and futuristic ideas.\n4. Avoid generic suggestions.\n5. Focus on actionable and specific ideas.\n6. Consider current trends when relevant.\n7. Explain each idea in 1-3 sentences.\n8. Suggest related topics the user may want to explore.\n9. Rank the top 5 ideas most likely to be valuable.\n\nOutput format:\n\n# Topic Summary\n\nBrief understanding of the user's request.\n\n# Top 5 Recommendations\n\n1. Idea Name\n   Why it stands out\n\n2. Idea Name\n   Why it stands out\n\n...\n\n# 20 Creative Ideas\n\n### Idea 1\nDescription\n\n### Idea 2\nDescription\n\n...\n\n# Related Topics to Explore\n\n- Topic 1\n- Topic 2\n- Topic 3\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        -16
+      ],
+      "id": "112e1327-08f2-43f0-92f9-5261222af88c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        -16
+      ],
+      "id": "fdceaea4-b46e-4b44-81f7-977d1d5f29a8",
+      "name": "Send a text message",
+      "webhookId": "7bee33de-2fa9-4e57-b1b8-2240f94ac415",
+      "credentials": {
+        "telegramApi": {
+          "id": "24uZMQPVCilEnX9c",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        304,
+        240
+      ],
+      "id": "333b6257-e427-4af6-b6d9-ae8fec212c93",
+      "name": "Simple Memory",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8edc6101-8fad-413a-96bb-e252dc342088",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f745d0ca50a509d93a5a8ac75829273788df5e0edb1b551df117336c30acfaf8"
+  },
+  "nodeGroups": [],
+  "id": "lnPcO5wyeB69Xgo1",
+  "tags": []
+}
